@@ -22,20 +22,21 @@ public class MainActivity extends Activity {
 
         // TODO
         // switch arraylists to non-allocated in draw
-        // pinch to change size
+        // speed adjustment option
         // slow color morph?
     }
 
     public static class Drawer extends View {
-        private static final int frameRate = 20;
+        private static final int frameRate = 15;
         private static final int speed = 1000 / frameRate;
         private static Random rnd;
         private static Paint paint;
         private static int viewWidth;
         private static int viewHeight;
         private static ArrayList<ArrayList<Boolean>> strikes;
-        private final static int size = 100;
-        private boolean running;
+        private static int size = 30;
+        private static int strokeScale = 5;
+        private static boolean running;
 
         public Drawer(Context con, AttributeSet attr) {
             super(con, attr);
@@ -45,7 +46,7 @@ public class MainActivity extends Activity {
             paint = new Paint(Paint.ANTI_ALIAS_FLAG);
             paint.setColor(Color.WHITE);
             paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(20f);
+            paint.setStrokeWidth(size / strokeScale);
             paint.setStrokeCap(Paint.Cap.ROUND);
             running = true;
         }
@@ -53,10 +54,22 @@ public class MainActivity extends Activity {
         @Override
         public boolean onTouchEvent(MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                if (running = !running) {
+                if (event.getPointerCount() == 1 && (running = !running)) {
                     invalidate();
                 }
 
+                return true;
+            }
+            else if (event.getAction() == MotionEvent.ACTION_MOVE &&
+                        event.getPointerCount() == 2) {
+                int x = (int)(event.getX(0) - event.getX(1));
+                int y = (int)(event.getY(0) - event.getY(1));
+                size = (int)Math.max(strokeScale, Math.sqrt(x * x + y * y) / 4);
+                strikes.clear();
+                strikes.add(new ArrayList<>());
+                paint.setStrokeWidth(size / strokeScale);
+                running = true;
+                invalidate();
                 return true;
             }
 
